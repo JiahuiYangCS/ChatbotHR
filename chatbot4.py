@@ -41,15 +41,6 @@ def ask_gpt3(question, documents):
     )
     return response.choices[0].message['content']
 
-"""def display_response(response):
-    container = st.empty()
-    display_text = ""
-    for char in response:
-        display_text += char
-        container.markdown(display_text)
-        time.sleep(0.05)  # 调整这个值以改变显示速度
-    time.sleep(2)
-    #container.empty()"""
     
 chat_history = []
 
