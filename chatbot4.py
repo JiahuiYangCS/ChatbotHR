@@ -4,12 +4,14 @@ import openai
 import faiss
 import numpy as np
 import os
-import PyPDF2
+
 from langchain.chat_models import ChatOpenAI
 import streamlit as st
 import time
+import re
 
-openai.api_key = "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"
+
+openai.api_key = "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"
 
 chat_model = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0.7, openai_api_key=openai.api_key)
 
@@ -41,55 +43,66 @@ def ask_gpt3(question, documents):
     )
     return response.choices[0].message['content']
 
-    
 chat_history = []
-
-# 其他导入...
-
-def display_response(new_response):
-    global chat_history
-    chat_history.append(new_response)
-    container = st.empty()
-
-    # 逐字显示新回复
-    display_text = ""
-    for char in new_response:
-        display_text += char
-        # 使用 Markdown 格式显示对话
-        container.markdown("".join(chat_history[:-1] + [display_text]), unsafe_allow_html=True)
-        time.sleep(0.01)  # 调整这个值以改变显示速度
-
-    time.sleep(2)
 
 def main():
     st.title("Company Policy Q&A Chatbot")
 
-    # 初始化 session_state 用于存储对话历史
     if 'chat_history' not in st.session_state:
         st.session_state['chat_history'] = []
 
-    # 创建一个容器用于显示对话历史
+    col1, col2 = st.columns([4, 1])  
+
+    with col1:
+        user_input = st.text_input("Please type in your question:", key="user_input", placeholder="Type your question here...")
+
+    with col2:
+        # 减少空行的数量来微调按钮位置
+        for _ in range(2):  # 根据需要可以将这个数字调整为1或2
+            st.write("")
+
+        submit_button = st.button("Submit")
+
+    # 创建一个容器用于实时显示回复
+    live_response_container = st.empty()
+
+    # 当按下提交按钮时
+    if submit_button:
+        submit_question(user_input, live_response_container)
+
+    # 创建另一个容器用于显示对话历史
     chat_container = st.container()
 
     # 在对话历史容器中显示对话历史
     with chat_container:
-        for chat in st.session_state['chat_history']:
+        for chat in reversed(st.session_state['chat_history']):
             st.markdown(chat, unsafe_allow_html=True)  # 使用 Markdown 格式显示对话
 
-    # 用户输入框和提交按钮放在底部
-    user_input = st.text_input("Please type in your question:", key="user_input")
-    if st.button("Submit"):
+def submit_question(user_input, container):
+    if user_input:
         retrieved_docs = retrieve_documents(user_input)
         response = ask_gpt3(user_input, retrieved_docs)
 
         # 更新对话历史
-        question = f"<b>User Input/Question:</b> {user_input}<br>"
-        answer = f"<b>Chatbot Answer:</b> {response}<br>"
+        question = f"<div style='text-align: right;'><b>User Input/Question:</b> {user_input}</div>"
+        answer = f"<div style='text-align: left;'><b>Chatbot Answer:</b> {response}</div>"
         st.session_state['chat_history'].append(question)
         st.session_state['chat_history'].append(answer)
 
         # 逐字显示回复
-        display_response(answer)
+        display_response(container, response)
 
+def display_response(container, new_response):
+    # 逐字显示新回复
+    display_text = ""
+    for char in new_response:
+        display_text += char
+        container.markdown(display_text, unsafe_allow_html=True)
+        time.sleep(0.01)  # 调整这个值以改变显示速度
+
+    # 显示完成后，清空容器
+    container.empty()
+    
 if __name__ == "__main__":
     main()
+
