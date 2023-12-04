@@ -1,15 +1,11 @@
-# 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
 
 import openai
 import faiss
 import numpy as np
 import os
-
 from langchain.chat_models import ChatOpenAI
 import streamlit as st
 import time
-import re
-
 
 openai.api_key = "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"
 
@@ -91,10 +87,9 @@ def display_response(container, new_response):
     for char in new_response:
         display_text += char
         container.markdown(display_text, unsafe_allow_html=True)
-        time.sleep(0.01)  # 调整这个值以改变显示速度
+        time.sleep(0.01) 
 
     container.empty()
     
 if __name__ == "__main__":
     main()
-
