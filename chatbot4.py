@@ -57,50 +57,42 @@ def main():
         user_input = st.text_input("Please type in your question:", key="user_input", placeholder="Type your question here...")
 
     with col2:
-        # 减少空行的数量来微调按钮位置
-        for _ in range(2):  # 根据需要可以将这个数字调整为1或2
+        for _ in range(2):  
             st.write("")
 
         submit_button = st.button("Submit")
-
-    # 创建一个容器用于实时显示回复
+        
     live_response_container = st.empty()
 
-    # 当按下提交按钮时
     if submit_button:
         submit_question(user_input, live_response_container)
 
-    # 创建另一个容器用于显示对话历史
     chat_container = st.container()
 
-    # 在对话历史容器中显示对话历史
     with chat_container:
         for chat in reversed(st.session_state['chat_history']):
-            st.markdown(chat, unsafe_allow_html=True)  # 使用 Markdown 格式显示对话
+            st.markdown(chat, unsafe_allow_html=True)  
 
 def submit_question(user_input, container):
     if user_input:
         retrieved_docs = retrieve_documents(user_input)
         response = ask_gpt3(user_input, retrieved_docs)
 
-        # 更新对话历史
         question = f"<div style='text-align: right;'><b>User Input/Question:</b> {user_input}</div>"
         answer = f"<div style='text-align: left;'><b>Chatbot Answer:</b> {response}</div>"
         st.session_state['chat_history'].append(question)
         st.session_state['chat_history'].append(answer)
 
-        # 逐字显示回复
         display_response(container, response)
 
 def display_response(container, new_response):
-    # 逐字显示新回复
+    
     display_text = ""
     for char in new_response:
         display_text += char
         container.markdown(display_text, unsafe_allow_html=True)
         time.sleep(0.01)  # 调整这个值以改变显示速度
 
-    # 显示完成后，清空容器
     container.empty()
     
 if __name__ == "__main__":
